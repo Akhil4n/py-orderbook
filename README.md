@@ -46,6 +46,5 @@ py-orderbook/
 ├── orderbook.py        # Core order book implementation
 ├── test_orderbook.py   # Unit tests
 ├── stress_test.py      # Performance benchmarks
-├── requirements.txt
-└── .env.example
+└── requirements.txt
 ```
