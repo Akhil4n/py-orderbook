@@ -95,7 +95,7 @@ def test_best_bid(book):
     book.cancel_order(bid_order2.order_id)
     assert book.best_bid() == Decimal("50.00")
     
-def test_cancel_nonexistant_order(book):
+def test_cancel_nonexistent_order(book):
     assert book.cancel_order("fakeorder") == False
 
 def test_market_order_empty_book(book):
