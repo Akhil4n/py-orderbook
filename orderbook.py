@@ -207,7 +207,7 @@ class OrderBook:
             return
         print("===== TRADE LOG =====")
         for i, trade in enumerate(self.trade_log, 1):
-            print(f"{i}. {trade.trade_type.name} | {trade.aggressor_side.name} | Price: {trade.price} | Qty: {trade.quantity_filled} | Aggressor: {trade.aggressor_id} | Filler: {trade.filler_id}")
+            print(f"{i}. {trade.trade_type.name} | {trade.aggressor_side.name} | Price: {trade.price} | Qty: {trade.quantity_filled} | aggressor_id: {trade.aggressor_id} | filler_id: {trade.filler_id}")
         print(f"Total trades: {len(self.trade_log)}")
         print("=====================")
 
