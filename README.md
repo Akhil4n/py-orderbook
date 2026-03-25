@@ -8,7 +8,7 @@ A high-performance order book implementation in Python.
 - Order cancellation
 - 124k+ matched orders/second throughput
 
-## Installation
+## Installation & Setup
 ```bash
 git clone https://github.com/Akhil4n/py-orderbook.git
 cd py-orderbook
@@ -32,7 +32,7 @@ book.add_limit_order(order)
 market_order = MarketOrder(side=OrderSide.ASK, original_quantity=50)
 book.add_market_order(market_order)
 
-print(book)
+print(book) # displays current bids and asks
 ```
 
 ## Running Tests
