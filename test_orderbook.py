@@ -1,6 +1,6 @@
 import pytest
 from decimal import Decimal
-from orderbook import Order, MarketOrder, OrderBook, OrderSide, OrderStatus
+from orderbook import Order, MarketOrder, OrderBook, OrderSide, OrderStatus, TradeType
 
 @pytest.fixture
 def book():
@@ -127,3 +127,49 @@ def test_display(book):
     assert "BIDS" in output
     assert output.index("52.00") < output.index("51.00")
     assert output.index("50.00") < output.index("49.00")
+
+def test_logs(book):
+    bid_order = Order(side=OrderSide.BID, price=Decimal("50.00"), original_quantity=100)
+    book.add_limit_order(bid_order)
+    ask_order = Order(side=OrderSide.ASK, price=Decimal("50.00"), original_quantity=100)
+    book.add_limit_order(ask_order)
+    assert len(book.trade_log) == 1
+    assert book.trade_log[0].price == Decimal("50.00")
+    assert book.trade_log[0].quantity_filled == 100
+    assert book.trade_log[0].aggressor_side == OrderSide.ASK
+    assert book.trade_log[0].trade_type == TradeType.LIMIT
+
+def test_trade_log_comprehensive(book):
+    ask1 = Order(side=OrderSide.ASK, price=Decimal("50.00"), original_quantity=60)
+    ask2 = Order(side=OrderSide.ASK, price=Decimal("51.00"), original_quantity=40)
+    book.add_limit_order(ask1)
+    book.add_limit_order(ask2)
+
+    bid = Order(side=OrderSide.BID, price=Decimal("51.00"), original_quantity=100)
+    book.add_limit_order(bid)
+
+    assert len(book.trade_log) == 2
+
+    assert book.trade_log[0].price == Decimal("50.00")
+    assert book.trade_log[0].quantity_filled == 60
+    assert book.trade_log[0].aggressor_side == OrderSide.BID
+    assert book.trade_log[0].trade_type == TradeType.LIMIT
+
+    assert book.trade_log[1].price == Decimal("51.00")
+    assert book.trade_log[1].quantity_filled == 40
+    assert book.trade_log[1].aggressor_side == OrderSide.BID
+    assert book.trade_log[1].trade_type == TradeType.LIMIT
+
+    assert len(book.asks) == 0
+    assert len(book.trade_log) == 2
+
+    ask3 = Order(side=OrderSide.ASK, price=Decimal("50.00"), original_quantity=50)
+    book.add_limit_order(ask3)
+    market_bid = MarketOrder(side=OrderSide.BID, original_quantity=50)
+    book.add_market_order(market_bid)
+
+    assert len(book.trade_log) == 3
+    assert book.trade_log[2].trade_type == TradeType.MARKET
+    assert book.trade_log[2].quantity_filled == 50
+    assert book.trade_log[2].aggressor_side == OrderSide.BID
+

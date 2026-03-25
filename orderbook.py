@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from dataclasses import dataclass, field
+from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 from sortedcontainers import SortedDict
@@ -14,6 +15,10 @@ class OrderStatus(Enum):
     PARTIALLY_FILLED = 1
     FILLED = 2
     CANCELLED = 3
+
+class TradeType(Enum):
+    LIMIT = 0
+    MARKET = 1
 
 _order_counter = 0
 
@@ -38,6 +43,16 @@ class Order:
 @dataclass
 class MarketOrder(Order):
     price: Optional[Decimal] = field(default=None, init=False)
+
+@dataclass
+class Trade:
+    price: Decimal
+    quantity_filled: int
+    aggressor_side: OrderSide
+    aggressor_id: str
+    filler_id: str
+    trade_type: TradeType
+    timestamp: datetime = field(default_factory=datetime.now, init=False)
 
 class PriceLevel:
     def __init__(self, price: Decimal, side: OrderSide):
@@ -77,6 +92,7 @@ class OrderBook:
         self.orders = {} # order_id -> (PriceLevel, Order)
         self._best_bid = None
         self._best_ask = None
+        self.trade_log = []
     
     # Price-Time priority matching algorithm
     def _match(self, order: Order):
@@ -88,6 +104,10 @@ class OrderBook:
         
         while price_level.queue and order.remaining_quantity > 0:
             curr = price_level.peek()
+            quantity = order.remaining_quantity if curr.remaining_quantity >= order.remaining_quantity else curr.remaining_quantity
+            log = Trade(curr.price, quantity, order.side, order.order_id, curr.order_id, 
+                        TradeType.MARKET if order.price is None else TradeType.LIMIT)
+            self.trade_log.append(log)
             if curr.remaining_quantity > order.remaining_quantity:
                 order.status = OrderStatus.FILLED
                 curr.status = OrderStatus.PARTIALLY_FILLED
@@ -180,6 +200,16 @@ class OrderBook:
 
     def best_ask(self) -> Decimal:
         return self._best_ask
+
+    def print_trade_log(self):
+        if not self.trade_log:
+            print("No trades executed.")
+            return
+        print("===== TRADE LOG =====")
+        for i, trade in enumerate(self.trade_log, 1):
+            print(f"{i}. {trade.trade_type.name} | {trade.aggressor_side.name} | Price: {trade.price} | Qty: {trade.quantity_filled} | Aggressor: {trade.aggressor_id} | Filler: {trade.filler_id}")
+        print(f"Total trades: {len(self.trade_log)}")
+        print("=====================")
 
     def __str__(self):
         lines = []
