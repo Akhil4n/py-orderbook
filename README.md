@@ -34,7 +34,7 @@ market_order = MarketOrder(side=OrderSide.BID, original_quantity=50)
 book.add_market_order(market_order)
 
 # Cancel an order
-book.cancel_order(bid.order_id)
+book.cancel_order(market_order.order_id) # cancels the market order we just put in
 
 # Display the book
 print(book)
