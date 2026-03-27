@@ -1,4 +1,3 @@
-import cProfile
 from decimal import Decimal
 from orderbook import Order, MarketOrder, OrderBook, OrderSide, OrderStatus
 import random
