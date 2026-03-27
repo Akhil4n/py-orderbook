@@ -3,3 +3,9 @@ __pycache__/
 .pytest_cache/
 .env
 playground.py
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+akhil4n_orderbook.egg-link
